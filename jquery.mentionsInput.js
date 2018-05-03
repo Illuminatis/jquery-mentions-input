@@ -19,7 +19,7 @@
         onDataRequest : $.noop, //Function where we can search the data
         minChars      : 2, //Minimum chars to fire the event
         allowRepeat   : false, //Allow repeat mentions
-        showAvatars   : true, //Show the avatars
+        showAvatars   : false, //Show the avatars
         elastic       : true, //Grow the textarea automatically
         defaultValue  : '',
         onCaret       : false,
@@ -29,18 +29,19 @@
         templates     : {
             wrapper                    : _.template('<div class="mentions-input-box"></div>'),
             autocompleteList           : _.template('<div class="mentions-autocomplete-list"></div>'),
-            autocompleteListItem       : _.template('<li data-ref-id="<%= id %>" data-ref-type="<%= type %>" data-display="<%= display %>"><%= content %></li>'),
+            autocompleteListItem       : _.template('<li data-ref-id="<%= id %>"  data-display="<%= display %>"><%= content %></li>'),
+            /* data-ref-type="<%= type %>" */
             autocompleteListItemAvatar : _.template('<img src="<%= avatar %>" />'),
             autocompleteListItemIcon   : _.template('<div class="icon <%= icon %>"></div>'),
             mentionsOverlay            : _.template('<div class="mentions"><div></div></div>'),
-            mentionItemSyntax          : _.template('@[<%= value %>](<%= type %>:<%= id %>)'),
+            mentionItemSyntax          : _.template('@[<%= value %>](<%= id %>)'), /* <%= type %>:*/
             mentionItemHighlight       : _.template('<strong><span><%= value %></span></strong>')
         }
     };
 
     //Class util
     var utils = {
-	    //Encodes the character with _.escape function (undersocre)
+        //Encodes the character with _.escape function (undersocre)
         htmlEncode       : function (str) {
             return _.escape(str);
         },
@@ -48,7 +49,7 @@
         regexpEncode     : function (str) {
             return str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
         },
-	    highlightTerm    : function (value, term) {
+        highlightTerm    : function (value, term) {
             if (!term && !term.length) {
                 return value;
             }
@@ -69,7 +70,7 @@
                 }
             }
         },
-	    //Deletes the white spaces
+        //Deletes the white spaces
         rtrim: function(string) {
             return string.replace(/\s+$/,"");
         }
@@ -90,10 +91,10 @@
             inputBuffer = [],
             currentDataQuery = '';
 
-	    //Mix the default setting with the users settings
+        //Mix the default setting with the users settings
         settings = $.extend(true, {}, defaultSettings, settings );
 
-	    //Initializes the text area target
+        //Initializes the text area target
         function initTextarea() {
             elmInputBox = $(domInput); //Get the text area target
 
@@ -138,7 +139,7 @@
             elmMentionsOverlay.prependTo(elmWrapperBox); //Insert into elmWrapperBox the mentions overlay
         }
 
-	    //Updates the values of the main variables
+        //Updates the values of the main variables
         function updateValues() {
             var syntaxMessage = getInputBoxValue(); //Get the actual value of the text area
 
@@ -161,7 +162,7 @@
             mentionText = mentionText.replace(/ {2}/g, '&nbsp; '); //Replace the 2 preceding token to &nbsp;
 
             elmInputBox.data('messageText', syntaxMessage); //Save the messageText to elmInputBox
-	        elmInputBox.trigger('updated');
+            elmInputBox.trigger('updated');
             elmMentionsOverlay.find('div').html(mentionText); //Insert into a div of the elmMentionsOverlay the mention text
         }
 
@@ -170,18 +171,18 @@
             inputBuffer = [];
         }
 
-	    //Updates the mentions collection
+        //Updates the mentions collection
         function updateMentionsCollection() {
             var inputText = getInputBoxValue(); //Get the actual value of text area
 
-	        //Returns the values that doesn't match the condition
+            //Returns the values that doesn't match the condition
             mentionsCollection = _.reject(mentionsCollection, function (mention, index) {
                 return !mention.value || inputText.indexOf(mention.value) == -1;
             });
             mentionsCollection = _.compact(mentionsCollection); //Delete all the falsy values of the array and return the new array
         }
 
-	    //Adds mention to mentions collections
+        //Adds mention to mentions collections
         function addMention(mention) {
 
             var currentMessage = getInputBoxValue(),
@@ -219,9 +220,9 @@
             hideAutoComplete();
 
             // Mentions and syntax message
-            var updatedMessageText = start + mention.value + ' ' + end;
+            var updatedMessageText = start + mention.text + ' ' + end;
             elmInputBox.val(updatedMessageText); //Set the value to the txt area
-	        elmInputBox.trigger('mention');
+            elmInputBox.trigger('mention');
             updateValues();
 
             // Set correct focus and selection
@@ -252,7 +253,7 @@
                 boxSizing: "content-box",
                 top: 0,
                 left: -9999
-              }, h = ["boxSizing", "fontFamily", "fontSize", "fontStyle", "fontVariant", "fontWeight", "height", "letterSpacing", "lineHeight", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "textDecoration", "textIndent", "textTransform", "width", "word-spacing"];
+            }, h = ["boxSizing", "fontFamily", "fontSize", "fontStyle", "fontVariant", "fontWeight", "height", "letterSpacing", "lineHeight", "paddingBottom", "paddingLeft", "paddingRight", "paddingTop", "textDecoration", "textIndent", "textTransform", "width", "word-spacing"];
             for (j = 0, k = h.length; j < k; j++) e = h[j], g[e] = $(i).css(e);
             return c = document.createElement("div"), $(c).css(g), $(i).after(c), b = document.createTextNode(i.value.substring(0, i.selectionEnd)), a = document.createTextNode(i.value.substring(i.selectionEnd)), d = document.createElement("span"), d.innerHTML = "&nbsp;", c.appendChild(b), c.appendChild(d), c.appendChild(a), c.scrollTop = i.scrollTop, f = $(d).position(), $(c).remove(), f
         }
@@ -285,7 +286,7 @@
             if (distanceScrolled > elmDistanceFromTop) {
                 //subtracts body distance to handle fixed headers
                 $(window).scrollTop(elmDistanceFromTop - bodyDistanceFromTop);
-              }
+            }
         }
 
         //Takes the click event when the user select a item of the dropdown
@@ -329,7 +330,7 @@
             }
         }
 
-	    //Takes the keydown event
+        //Takes the keydown event
         function onInputBoxKeyDown(e) {
 
             // This also matches HOME/END on OSX which is CMD+LEFT, CMD+RIGHT
@@ -341,7 +342,7 @@
                 // to stay on the screen whenever backspace is pressed after a highlighed word. This is simply a hack
                 // to force updateValues() to fire when backspace/delete is pressed in IE9.
                 if (navigator.userAgent.indexOf("MSIE 9") > -1) {
-                  _.defer(updateValues); //Call the updateValues function
+                    _.defer(updateValues); //Call the updateValues function
                 }
 
                 return;
@@ -381,7 +382,7 @@
                         elmActiveAutoCompleteItem.trigger('mousedown'); //Calls the mousedown event
                         return false;
                     }
-                break;
+                    break;
             }
 
             return true;
@@ -401,7 +402,7 @@
             elmActiveAutoCompleteItem = elmItem; //Sets the item to elmActiveAutoCompleteItem
         }
 
-	    //Populates dropdown
+        //Populates dropdown
         function populateDropdown(query, results) {
             elmAutocompleteList.show(); //Shows the autocomplete list
 
@@ -424,13 +425,13 @@
             _.each(results, function (item, index) {
                 var itemUid = _.uniqueId('mention_'); //Gets the item with unique id
 
-                autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.text}); //Inserts the new item to autocompleteItemCollection
+                autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.name,text: item.text}); //Inserts the new item to autocompleteItemCollection
 
                 var elmListItem = $(settings.templates.autocompleteListItem({
                     'id'      : utils.htmlEncode(item.id),
                     'display' : utils.htmlEncode(item.name),
+                   // 'type'    : utils.htmlEncode(item.type),
                     'text' : utils.htmlEncode(item.text),
-                    'type'    : utils.htmlEncode(item.type),
                     'content' : utils.highlightTerm(utils.htmlEncode((item.display ? item.display : item.name)), query)
                 })).attr('data-uid', itemUid); //Inserts the new item to list
 
@@ -438,7 +439,7 @@
                 if (index === 0) {
                     selectAutoCompleteItem(elmListItem);
                 }
-
+/*
                 //If show avatars is true
                 if (settings.showAvatars) {
                     var elmIcon;
@@ -451,14 +452,15 @@
                     }
                     elmIcon.prependTo(elmListItem); //Inserts the elmIcon to elmListItem
                 }
+                */
                 elmListItem = elmListItem.appendTo(elmDropDownList); //Insets the elmListItem to elmDropDownList
             });
 
             elmAutocompleteList.show(); //Shows the elmAutocompleteList div
-	        if (settings.onCaret) {
-		        positionAutocomplete(elmAutocompleteList, elmInputBox);
+            if (settings.onCaret) {
+                positionAutocomplete(elmAutocompleteList, elmInputBox);
             }
-	        elmDropDownList.show(); //Shows the elmDropDownList
+            elmDropDownList.show(); //Shows the elmDropDownList
         }
 
         //Search into data list passed as parameter
@@ -474,7 +476,7 @@
             }
         }
 
-	    function positionAutocomplete(elmAutocompleteList, elmInputBox) {
+        function positionAutocomplete(elmAutocompleteList, elmInputBox) {
             var elmAutocompleteListPosition = elmAutocompleteList.css('position');
             if (elmAutocompleteListPosition == 'absolute') {
                 var position = textareaSelectionPosition(elmInputBox),
@@ -508,6 +510,7 @@
             var match, newMentionText = mentionText;
             while ((match = regex.exec(mentionText)) != null) {
                 newMentionText = newMentionText.replace(match[0], match[1] + match[2]);
+                console.log({ 'id': match[4], 'type': match[3], 'value': match[2], 'trigger': match[1] });
                 mentionsCollection.push({ 'id': match[4], 'type': match[3], 'value': match[2], 'trigger': match[1] });
             }
             elmInputBox.val(newMentionText);
@@ -516,7 +519,7 @@
         // Public methods
         return {
             //Initializes the mentionsInput component on a specific element.
-	        init : function (domTarget) {
+            init : function (domTarget) {
 
                 domInput = domTarget;
 
@@ -531,7 +534,7 @@
                 }
             },
 
-	        //An async method which accepts a callback function and returns a value of the input field (including markup) as a first parameter of this function. This is the value you want to send to your server.
+            //An async method which accepts a callback function and returns a value of the input field (including markup) as a first parameter of this function. This is the value you want to send to your server.
             val : function (callback) {
                 if (!_.isFunction(callback)) {
                     return;
@@ -539,7 +542,7 @@
                 callback.call(this, mentionsCollection.length ? elmInputBox.data('messageText') : getInputBoxValue());
             },
 
-        	//Resets the text area value and clears all mentions
+            //Resets the text area value and clears all mentions
             reset : function () {
                 resetInput();
             },
@@ -549,7 +552,7 @@
                 resetInput(false);
             },
 
-	        //An async method which accepts a callback function and returns a collection of mentions as hash objects as a first parameter.
+            //An async method which accepts a callback function and returns a collection of mentions as hash objects as a first parameter.
             getMentions : function (callback) {
                 if (!_.isFunction(callback)) {
                     return;
