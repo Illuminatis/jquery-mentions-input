@@ -424,11 +424,12 @@
             _.each(results, function (item, index) {
                 var itemUid = _.uniqueId('mention_'); //Gets the item with unique id
 
-                autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.name}); //Inserts the new item to autocompleteItemCollection
+                autocompleteItemCollection[itemUid] = _.extend({}, item, {value: item.text}); //Inserts the new item to autocompleteItemCollection
 
                 var elmListItem = $(settings.templates.autocompleteListItem({
                     'id'      : utils.htmlEncode(item.id),
                     'display' : utils.htmlEncode(item.name),
+                    'text' : utils.htmlEncode(item.text),
                     'type'    : utils.htmlEncode(item.type),
                     'content' : utils.highlightTerm(utils.htmlEncode((item.display ? item.display : item.name)), query)
                 })).attr('data-uid', itemUid); //Inserts the new item to list
